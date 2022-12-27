@@ -56,35 +56,35 @@ cube_neighbours = {
                     },
                     "B":
                     {
-                        "U": ["U", "TL", "TM", "TR"],
-                        "D": ["D", "BL", "BM", "BR"],
+                        "U": ["U", "TR", "TM", "TL"],
+                        "D": ["D", "BR", "BM", "BL"],
                         "L": ["R", "TR", "MR", "BR"],
                         "R": ["L", "TL", "ML", "BL"]
                     },
                     "U":
                     {
-                        "U": ["B", "TL", "TM", "TR"],
+                        "U": ["B", "TR", "TM", "TL"],
                         "D": ["F", "TL", "TM", "TR"],
                         "L": ["L", "TL", "TM", "TR"],
-                        "R": ["R", "TL", "TM", "TR"]
+                        "R": ["R", "TR", "TM", "TL"]
                     },
                     "D":
                     {
                         "U": ["F", "BL", "BM", "BR"],
-                        "D": ["B", "BL", "BM", "BR"],
-                        "L": ["L", "BL", "BM", "BR"],
+                        "D": ["B", "BR", "BM", "BL"],
+                        "L": ["L", "BR", "BM", "BL"],
                         "R": ["R", "BL", "BM", "BR"]
                     },
                     "L":
                     {
                         "U": ["U", "TL", "ML", "BL"],
-                        "D": ["D", "TL", "ML", "BL"],
+                        "D": ["D", "BL", "ML", "TL"],
                         "L": ["B", "TR", "MR", "BR"],
                         "R": ["F", "TL", "ML", "BL"]
                     },
                     "R":
                     {
-                        "U": ["U", "TR", "MR", "BR"],
+                        "U": ["U", "BR", "MR", "TR"],
                         "D": ["D", "TR", "MR", "BR"],
                         "L": ["F", "TR", "MR", "BR"],
                         "R": ["B", "TL", "ML", "BL"]
@@ -134,7 +134,7 @@ def rotate_face(cube: dict, side: str) -> dict:
     return new_cube
 
 
-def print_cube(cube):
+def print_cube(cube: dict):
     print(f'\n{cube["U"]["TL"]:<2} {cube["U"]["TM"]:<2} {cube["U"]["TR"]:<2}')
     print(f'{cube["U"]["ML"]:<2} {cube["U"]["MM"]:<2} {cube["U"]["MR"]:<2}')
     print(f'{cube["U"]["BL"]:<2} {cube["U"]["BM"]:<2} {cube["U"]["BR"]:<2}\n')
@@ -161,7 +161,7 @@ def print_face(cube: dict, face: str):
     print(f'{cube[face]["BL"]:<2} {cube[face]["BM"]:<2} {cube[face]["BR"]:<2}')
 
 
-def randomise_cube(cube: dict):
+def randomise_cube(cube: dict) -> dict:
     new_cube = copy.deepcopy(cube)
     moves_list = list(MOVES)
     print(moves_list)
@@ -173,13 +173,14 @@ def randomise_cube(cube: dict):
 
 
 def main():
-    current_cube = start_cube.copy()
+    current_cube = copy.deepcopy(start_cube)
     print_cube(current_cube)
-
+    print(current_cube == start_cube)
     current_cube = randomise_cube(current_cube)
     print_cube(current_cube)
+    print(current_cube == start_cube)
 
-    for _ in range(10):
+    while start_cube != current_cube:
         user_choice = input(f"Choose a face to rotate (clockwise) must be one of: {MOVES}\n\
                             Choice: ").upper()
         if user_choice in MOVES:
