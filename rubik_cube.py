@@ -194,7 +194,8 @@ def generate_model(cube: dict):
                         [4, 88, 89, 93, 92], [4, 89, 90, 94, 93], [4, 90, 91, 95, 94]   # R3
                        ])
     mesh = pv.PolyData(vertices, faces)
-    mesh.cell_data['colors'] = [  # Front
+    mesh.cell_data['colors'] = [
+                                # Front
                                 COLOURS[cube["F"]["BL"]], COLOURS[cube["F"]["BM"]], COLOURS[cube["F"]["BR"]],  # R1
                                 COLOURS[cube["F"]["ML"]], COLOURS[cube["F"]["MM"]], COLOURS[cube["F"]["MR"]],  # R2
                                 COLOURS[cube["F"]["TL"]], COLOURS[cube["F"]["TM"]], COLOURS[cube["F"]["TR"]],  # R3
@@ -215,9 +216,9 @@ def generate_model(cube: dict):
                                 COLOURS[cube["U"]["ML"]], COLOURS[cube["U"]["MM"]], COLOURS[cube["U"]["MR"]],  # R2
                                 COLOURS[cube["U"]["TL"]], COLOURS[cube["U"]["TM"]], COLOURS[cube["U"]["TR"]],  # R3
                                 # Down
-                                COLOURS[cube["D"]["TL"]], COLOURS[cube["D"]["TM"]], COLOURS[cube["D"]["TR"]],  # R1
+                                COLOURS[cube["D"]["TL"]], COLOURS[cube["D"]["TM"]], COLOURS[cube["D"]["TR"]],  # R3
                                 COLOURS[cube["D"]["ML"]], COLOURS[cube["D"]["MM"]], COLOURS[cube["D"]["MR"]],  # R2
-                                COLOURS[cube["D"]["BL"]], COLOURS[cube["D"]["BM"]], COLOURS[cube["D"]["BR"]]]  # R3
+                                COLOURS[cube["D"]["BL"]], COLOURS[cube["D"]["BM"]], COLOURS[cube["D"]["BR"]]]  # R1
     plotter = pv.Plotter()
     plotter.show_axes()
     plotter.add_mesh(mesh,
@@ -306,17 +307,15 @@ def randomise_cube(cube: dict) -> dict:
 
 def main():
     current_cube = copy.deepcopy(START_CUBE)
-    print_cube(current_cube)
-    generate_model(current_cube)
     current_cube = randomise_cube(current_cube)
     generate_model(current_cube)
 
-    while START_CUBE != current_cube:
+    while current_cube != START_CUBE:
         user_choice = input(f"Choose a face to rotate (clockwise) must be one of: {MOVES}\n\
                             Choice: ").upper()
         if user_choice in MOVES:
             current_cube = rotate_face(current_cube, user_choice)
-            generate_model(current_cube)
+            generate_model(current_cube)  
 
 
 if __name__ == "__main__":
