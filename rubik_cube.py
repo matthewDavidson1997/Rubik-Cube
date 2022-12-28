@@ -272,18 +272,13 @@ def main():
     generate_model(current_cube)
     current_cube = randomise_cube(current_cube)
     generate_model(current_cube)
-    """
-    print(current_cube == start_cube)
-    current_cube = randomise_cube(current_cube)
-    print_cube(current_cube)
-    print(current_cube == start_cube)
 
-    while start_cube != current_cube:
+    while START_CUBE != current_cube:
         user_choice = input(f"Choose a face to rotate (clockwise) must be one of: {MOVES}\n\
                             Choice: ").upper()
         if user_choice in MOVES:
             current_cube = rotate_face(current_cube, user_choice)
-            print_cube(current_cube)"""
+            generate_model(current_cube)
 
 
 if __name__ == "__main__":
