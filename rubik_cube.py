@@ -5,8 +5,8 @@ import pyvista as pv
 import numpy as np
 
 
-
 MOVES = {"U", "D", "F", "B", "L", "R"}
+
 COLOURS = {"Red": [255, 0, 0],
            "Green": [0, 255, 0],
            "Blue": [0, 0, 255],
@@ -15,7 +15,7 @@ COLOURS = {"Red": [255, 0, 0],
            "Orange": [255, 128, 0]}
 
 
-start_cube = {
+START_CUBE = {
         # Red Side (Front)
         "F": {
             "TL": "Red", "TM": "Red", "TR": "Red",
@@ -59,7 +59,7 @@ start_cube = {
             }
         }
 
-cube_neighbours = {
+CUBE_NEIGHBOURS = {
                     "F":
                     {
                         "U": ["U", "BL", "BM", "BR"],
@@ -191,10 +191,10 @@ def generate_model(cube: dict):
 def rotate_face(cube: dict, side: str) -> dict:
     # one rotation clockwise
     new_cube = copy.deepcopy(cube)
-    neighbours_u = list(cube_neighbours[side]["U"])
-    neighbours_d = list(cube_neighbours[side]["D"])
-    neighbours_l = list(cube_neighbours[side]["L"])
-    neighbours_r = list(cube_neighbours[side]["R"])
+    neighbours_u = list(CUBE_NEIGHBOURS[side]["U"])
+    neighbours_d = list(CUBE_NEIGHBOURS[side]["D"])
+    neighbours_l = list(CUBE_NEIGHBOURS[side]["L"])
+    neighbours_r = list(CUBE_NEIGHBOURS[side]["R"])
     # Face top row
     new_cube[side]["TL"] = cube[side]["BL"]
     new_cube[side]["TM"] = cube[side]["ML"]
@@ -267,7 +267,7 @@ def randomise_cube(cube: dict) -> dict:
 
 def main():
     
-    current_cube = copy.deepcopy(start_cube)
+    current_cube = copy.deepcopy(START_CUBE)
     print_cube(current_cube)
     generate_model(current_cube)
     current_cube = randomise_cube(current_cube)
