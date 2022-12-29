@@ -270,33 +270,6 @@ def rotate_face(cube: dict, side: str) -> dict:
     return new_cube
 
 
-def print_cube(cube: dict):
-    print(f'\n{cube["U"]["TL"]:<2} {cube["U"]["TM"]:<2} {cube["U"]["TR"]:<2}')
-    print(f'{cube["U"]["ML"]:<2} {cube["U"]["MM"]:<2} {cube["U"]["MR"]:<2}')
-    print(f'{cube["U"]["BL"]:<2} {cube["U"]["BM"]:<2} {cube["U"]["BR"]:<2}\n')
-    print(f'{cube["F"]["TL"]:<2} {cube["F"]["TM"]:<2} {cube["F"]["TR"]:<2}\
-    {cube["R"]["TL"]:<2} {cube["R"]["TM"]:<2} {cube["R"]["TR"]:<2}\
-    {cube["B"]["TL"]:<2} {cube["B"]["TM"]:<2} {cube["B"]["TR"]:<2}\
-    {cube["L"]["TL"]:<2} {cube["L"]["TM"]:<2} {cube["L"]["TR"]:<2}')
-    print(f'{cube["F"]["ML"]:<2} {cube["F"]["MM"]:<2} {cube["F"]["MR"]:<2}\
-    {cube["R"]["ML"]:<2} {cube["R"]["MM"]:<2} {cube["R"]["MR"]:<2}\
-    {cube["B"]["ML"]:<2} {cube["B"]["MM"]:<2} {cube["B"]["MR"]:<2}\
-    {cube["L"]["ML"]:<2} {cube["L"]["MM"]:<2} {cube["L"]["MR"]:<2}')
-    print(f'{cube["F"]["BL"]:<2} {cube["F"]["BM"]:<2} {cube["F"]["BR"]:<2}\
-    {cube["R"]["BL"]:<2} {cube["R"]["BM"]:<2} {cube["R"]["BR"]:<2}\
-    {cube["B"]["BL"]:<2} {cube["B"]["BM"]:<2} {cube["B"]["BR"]:<2}\
-    {cube["L"]["BL"]:<2} {cube["L"]["BM"]:<2} {cube["L"]["BR"]:<2}\n')
-    print(f'{cube["D"]["TL"]:<2} {cube["D"]["TM"]:<2} {cube["D"]["TR"]:<2}')
-    print(f'{cube["D"]["ML"]:<2} {cube["D"]["MM"]:<2} {cube["D"]["MR"]:<2}')
-    print(f'{cube["D"]["BL"]:<2} {cube["D"]["BM"]:<2} {cube["D"]["BR"]:<2}')
-
-
-def print_face(cube: dict, face: str):
-    print(f'{cube[face]["TL"]:<2} {cube[face]["TM"]:<2} {cube[face]["TR"]:<2}')
-    print(f'{cube[face]["ML"]:<2} {cube[face]["MM"]:<2} {cube[face]["MR"]:<2}')
-    print(f'{cube[face]["BL"]:<2} {cube[face]["BM"]:<2} {cube[face]["BR"]:<2}')
-
-
 def randomise_cube(cube: dict) -> dict:
     new_cube = copy.deepcopy(cube)
     moves_list = list(MOVES)
