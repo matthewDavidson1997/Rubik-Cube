@@ -320,6 +320,9 @@ def main():
     current_cube = copy.deepcopy(START_CUBE)
     plotter = generate_model(current_cube)
     plotter.show()
+    randomise_cube_choice = "n"
+    while randomise_cube_choice == "n":
+        randomise_cube_choice = input("Randomise cube?: ")
     current_cube = randomise_cube(current_cube)
     plotter.add_mesh(generate_mesh(current_cube),
                      scalars='colors',
