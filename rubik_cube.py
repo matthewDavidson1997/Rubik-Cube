@@ -17,7 +17,6 @@ COLOURS = {"Red": [255, 0, 0],
            "White": [255, 255, 255],
            "Orange": [255, 128, 0]}
 
-
 START_CUBE = {
         # Red Side (Front)
         "F": {
@@ -228,15 +227,8 @@ def generate_mesh(cube: dict):
 
 
 def generate_model(cube: dict):
-    mesh = generate_mesh(cube)
     plotter = plotting.QtInteractor(auto_update=True)
-    plotter.show_axes()
-    plotter.add_mesh(mesh,
-                     scalars='colors',
-                     lighting=False,
-                     rgb=True,
-                     preference='cell',
-                     show_edges=True)
+    plotter = update_mesh(plotter, cube)
     return plotter
 
 
@@ -275,7 +267,6 @@ def rotate_face(cube: dict, side: str) -> dict:
     new_cube[neighbours_r[0]][neighbours_r[1]] = cube[neighbours_u[0]][neighbours_u[1]]
     new_cube[neighbours_r[0]][neighbours_r[2]] = cube[neighbours_u[0]][neighbours_u[2]]
     new_cube[neighbours_r[0]][neighbours_r[3]] = cube[neighbours_u[0]][neighbours_u[3]]
-
     return new_cube
 
 
@@ -315,33 +306,35 @@ def randomise_cube(cube: dict) -> dict:
     return new_cube
 
 
-def main():
-    app = QtWidgets.QApplication(sys.argv)
-    current_cube = copy.deepcopy(START_CUBE)
-    plotter = generate_model(current_cube)
-    plotter.show()
-    randomise_cube_choice = "n"
-    while randomise_cube_choice == "n":
-        randomise_cube_choice = input("Randomise cube?: ")
-    current_cube = randomise_cube(current_cube)
+def update_mesh(plotter: plotting.QtInteractor, current_cube: dict) -> plotting.QtInteractor:
     plotter.add_mesh(generate_mesh(current_cube),
                      scalars='colors',
                      lighting=False,
                      rgb=True,
                      preference='cell',
                      show_edges=True)
+    return plotter
 
-    while current_cube != START_CUBE:
+
+def main():
+    app = QtWidgets.QApplication(sys.argv)
+    current_cube = copy.deepcopy(START_CUBE)
+
+    plotter = generate_model(current_cube)
+    plotter.show()
+
+    randomise_cube_choice = input("Would you like to randomise the cube? (Y/N): ").upper()
+    if randomise_cube_choice == "Y":
+        current_cube = randomise_cube(current_cube)
+
+    plotter = update_mesh(plotter, current_cube)
+
+    while True:
         user_choice = input(f"Choose a face to rotate (clockwise) must be one of: {MOVES}\n\
                             Choice: ").upper()
         if user_choice in MOVES:
             current_cube = rotate_face(current_cube, user_choice)
-            plotter.add_mesh(generate_mesh(current_cube),
-                     scalars='colors',
-                     lighting=False,
-                     rgb=True,
-                     preference='cell',
-                     show_edges=True)
+            plotter = update_mesh(plotter, current_cube)
 
 
 if __name__ == "__main__":
