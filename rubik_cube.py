@@ -286,6 +286,12 @@ def randomise_cube(plotter: plotting.QtInteractor):
         rotate_face(move, plotter, current_cube)
 
 
+def reset_cube(plotter):
+    global current_cube
+    current_cube = copy.deepcopy(START_CUBE)
+    plotter = update_mesh(plotter)
+
+
 def update_mesh(plotter: plotting.QtInteractor) -> plotting.QtInteractor:
     global current_cube
     plotter.add_mesh(generate_mesh(current_cube),
@@ -294,7 +300,7 @@ def update_mesh(plotter: plotting.QtInteractor) -> plotting.QtInteractor:
                      rgb=True,
                      preference='cell',
                      show_edges=True)
-    return plotter
+    return plotter 
 
 
 def main():
@@ -312,30 +318,76 @@ def main():
 
     randomise_button = QtWidgets.QPushButton("Randomise Cube")
     rotate_f = QtWidgets.QPushButton("Rotate Red")
+    reverse_f = QtWidgets.QPushButton("Reverse Red")
     rotate_r = QtWidgets.QPushButton("Rotate Blue")
+    reverse_r = QtWidgets.QPushButton("Reverse Blue")
     rotate_b = QtWidgets.QPushButton("Rotate Orange")
+    reverse_b = QtWidgets.QPushButton("Reverse Orange")
     rotate_l = QtWidgets.QPushButton("Rotate Green")
+    reverse_l = QtWidgets.QPushButton("Reverse Green")
     rotate_u = QtWidgets.QPushButton("Rotate White")
+    reverse_u = QtWidgets.QPushButton("Reverse White")
     rotate_d = QtWidgets.QPushButton("Rotate Yellow")
+    reverse_d = QtWidgets.QPushButton("Reverse Yellow")
+    reset_button = QtWidgets.QPushButton("Reset Cube")
+    rotate_middle = QtWidgets.QPushButton("Rotate Middle")
+    reverse_middle = QtWidgets.QPushButton("Reverse Middle")
+    rotate_equator = QtWidgets.QPushButton("Rotate Equator")
+    reverse_equator = QtWidgets.QPushButton("Reverse Equator")
+    rotate_standing = QtWidgets.QPushButton("Rotate Standing")
+    reverse_standing = QtWidgets.QPushButton("Reverse Standing")
 
-    layout = QtWidgets.QVBoxLayout()
-    layout.addWidget(plotter)
-    layout.addWidget(randomise_button)
-    layout.addWidget(rotate_f)
-    layout.addWidget(rotate_r)
-    layout.addWidget(rotate_b)
-    layout.addWidget(rotate_l)
-    layout.addWidget(rotate_u)
-    layout.addWidget(rotate_d)
 
-    window.setLayout(layout)
+    layout_buttons_left = QtWidgets.QVBoxLayout()
+    layout_buttons_right = QtWidgets.QVBoxLayout()
+    layout_buttons_left.addWidget(randomise_button)
+    layout_buttons_right.addWidget(reset_button)
+    layout_buttons_left.addWidget(rotate_f)
+    layout_buttons_right.addWidget(reverse_f)
+    layout_buttons_left.addWidget(rotate_r)
+    layout_buttons_right.addWidget(reverse_r)
+    layout_buttons_left.addWidget(rotate_b)
+    layout_buttons_right.addWidget(reverse_b)
+    layout_buttons_left.addWidget(rotate_l)
+    layout_buttons_right.addWidget(reverse_l)
+    layout_buttons_left.addWidget(rotate_u)
+    layout_buttons_right.addWidget(reverse_u)
+    layout_buttons_left.addWidget(rotate_d)
+    layout_buttons_right.addWidget(reverse_d)
+    layout_buttons_left.addWidget(rotate_middle)
+    layout_buttons_right.addWidget(reverse_middle)
+    layout_buttons_left.addWidget(rotate_equator)
+    layout_buttons_right.addWidget(reverse_equator)
+    layout_buttons_left.addWidget(rotate_standing)
+    layout_buttons_right.addWidget(reverse_standing)
+
+    layout_window = QtWidgets.QHBoxLayout()
+    layout_window.addWidget(plotter)
+    layout_window.addLayout(layout_buttons_left)
+    layout_window.addLayout(layout_buttons_right)
+
+    window.setLayout(layout_window)
+    window.setWindowTitle("Rubik's Cube")
     randomise_button.clicked.connect(lambda: randomise_cube(plotter=plotter))
     rotate_f.clicked.connect(lambda: rotate_face("F", plotter, current_cube))
+    reverse_f.clicked.connect(lambda: [rotate_face("F", plotter, current_cube) for _ in range(3)])
     rotate_r.clicked.connect(lambda: rotate_face("R", plotter, current_cube))
+    reverse_r.clicked.connect(lambda: [rotate_face("R", plotter, current_cube) for _ in range(3)])
     rotate_b.clicked.connect(lambda: rotate_face("B", plotter, current_cube))
+    reverse_b.clicked.connect(lambda: [rotate_face("B", plotter, current_cube) for _ in range(3)])
     rotate_l.clicked.connect(lambda: rotate_face("L", plotter, current_cube))
+    reverse_l.clicked.connect(lambda: [rotate_face("L", plotter, current_cube) for _ in range(3)])
     rotate_u.clicked.connect(lambda: rotate_face("U", plotter, current_cube))
+    reverse_u.clicked.connect(lambda: [rotate_face("U", plotter, current_cube) for _ in range(3)])
     rotate_d.clicked.connect(lambda: rotate_face("D", plotter, current_cube))
+    reverse_d.clicked.connect(lambda: [rotate_face("D", plotter, current_cube) for _ in range(3)])
+    rotate_middle.clicked.connect(lambda: [rotate_face(x, plotter, current_cube) for x in ["L", "R", "R", "R"]])
+    reverse_middle.clicked.connect(lambda: [rotate_face(x, plotter, current_cube) for x in ["R", "L", "L", "L"]])
+    rotate_equator.clicked.connect(lambda: [rotate_face(x, plotter, current_cube) for x in ["U", "U", "U", "D"]])
+    reverse_equator.clicked.connect(lambda: [rotate_face(x, plotter, current_cube) for x in ["D", "D", "D", "U"]])
+    rotate_standing.clicked.connect(lambda: [rotate_face(x, plotter, current_cube) for x in ["F", "F", "F", "B"]])
+    reverse_standing.clicked.connect(lambda: [rotate_face(x, plotter, current_cube) for x in ["F", "B", "B", "B"]])
+    reset_button.clicked.connect(lambda: reset_cube(plotter))
     # layout = QtWidgets.QHBoxLayout()
 
     randomise_cube_choice = input("Would you like to randomise the cube? (Y/N): ").upper()
