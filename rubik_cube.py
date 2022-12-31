@@ -339,6 +339,7 @@ def main():
 
     layout_buttons_left = QtWidgets.QVBoxLayout()
     layout_buttons_right = QtWidgets.QVBoxLayout()
+    
     layout_buttons_left.addWidget(randomise_button)
     layout_buttons_right.addWidget(reset_button)
     layout_buttons_left.addWidget(rotate_f)
@@ -367,6 +368,8 @@ def main():
 
     window.setLayout(layout_window)
     window.setWindowTitle("Rubik's Cube")
+
+    # Define actions for each button press
     randomise_button.clicked.connect(lambda: randomise_cube(plotter=plotter))
     rotate_f.clicked.connect(lambda: rotate_face("F", plotter, current_cube))
     reverse_f.clicked.connect(lambda: [rotate_face("F", plotter, current_cube) for _ in range(3)])
