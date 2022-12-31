@@ -226,13 +226,13 @@ def generate_mesh(cube: dict):
     return mesh
 
 
-def generate_model(cube: dict):
-    plotter = plotting.QtInteractor(auto_update=True)
+def generate_model(cube: dict, window: QtWidgets.QWidget) -> plotting.QtInteractor:
+    plotter = plotting.QtInteractor(parent=window, auto_update=True)
     plotter = update_mesh(plotter, cube)
     return plotter
 
 
-def rotate_face(cube: dict, side: str) -> dict:
+def rotate_face(cube: dict, side: str, plotter: plotting.QtInteractor) -> dict:
     # one rotation clockwise
     new_cube = copy.deepcopy(cube)
     neighbours_u = list(CUBE_NEIGHBOURS[side]["U"])
@@ -267,15 +267,16 @@ def rotate_face(cube: dict, side: str) -> dict:
     new_cube[neighbours_r[0]][neighbours_r[1]] = cube[neighbours_u[0]][neighbours_u[1]]
     new_cube[neighbours_r[0]][neighbours_r[2]] = cube[neighbours_u[0]][neighbours_u[2]]
     new_cube[neighbours_r[0]][neighbours_r[3]] = cube[neighbours_u[0]][neighbours_u[3]]
+    plotter = update_mesh(plotter, cube)
     return new_cube
 
 
-def randomise_cube(cube: dict) -> dict:
+def randomise_cube(cube: dict, plotter: plotting.QtInteractor) -> dict:
     new_cube = copy.deepcopy(cube)
     moves_list = list(MOVES)
     for _ in range(50):
         move = moves_list[random.randrange(0, 6)]
-        new_cube = rotate_face(new_cube, move)
+        new_cube = rotate_face(new_cube, move, plotter)
     return new_cube
 
 
@@ -290,23 +291,42 @@ def update_mesh(plotter: plotting.QtInteractor, current_cube: dict) -> plotting.
 
 
 def main():
+    # Initialise an app to display the cube
     app = QtWidgets.QApplication(sys.argv)
+    window = QtWidgets.QWidget()
+    # Initialise a game cube based on a solved cube
     current_cube = copy.deepcopy(START_CUBE)
+    # Generage a model of the cube to display
+    plotter = generate_model(current_cube, window)
+    # Display the window
+    window.show()
+    
+    button1 = QtWidgets.QPushButton("One")
+    button2 = QtWidgets.QPushButton("Two")
+    button3 = QtWidgets.QPushButton("Three")
+    button4 = QtWidgets.QPushButton("Four")
+    button5 = QtWidgets.QPushButton("Five")
 
-    plotter = generate_model(current_cube)
-    plotter.show()
+    layout = QtWidgets.QHBoxLayout()
+    layout.addWidget(button1)
+    layout.addWidget(button2)
+    layout.addWidget(button3)
+    layout.addWidget(button4)
+    layout.addWidget(button5)
+
+    window.setLayout(layout)
+    # layout = QtWidgets.QHBoxLayout()
 
     randomise_cube_choice = input("Would you like to randomise the cube? (Y/N): ").upper()
     if randomise_cube_choice == "Y":
-        current_cube = randomise_cube(current_cube)
-
-    plotter = update_mesh(plotter, current_cube)
+        current_cube = randomise_cube(current_cube, plotter)
+        plotter = update_mesh(plotter, current_cube)
 
     while True:
         user_choice = input(f"Choose a face to rotate (clockwise) must be one of: {MOVES}\n\
                             Choice: ").upper()
         if user_choice in MOVES:
-            current_cube = rotate_face(current_cube, user_choice)
+            current_cube = rotate_face(current_cube, user_choice, plotter)
             plotter = update_mesh(plotter, current_cube)
 
 
