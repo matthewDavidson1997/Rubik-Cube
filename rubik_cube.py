@@ -303,18 +303,9 @@ def update_mesh(plotter: plotting.QtInteractor) -> plotting.QtInteractor:
     return plotter
 
 
-def main():
-    global current_cube
-    current_cube = copy.deepcopy(START_CUBE)
-    # Initialise an app to display the cube
-    app = QtWidgets.QApplication(sys.argv)
+def initialise_window():
     window = QtWidgets.QWidget()
-
-    # Generage a model of the cube to display
     plotter = generate_model()
-
-    # Display the window
-    window.show()
 
     randomise_button = QtWidgets.QPushButton("Randomise Cube")
     reset_button = QtWidgets.QPushButton("Reset Cube")
@@ -339,7 +330,7 @@ def main():
 
     layout_buttons_left = QtWidgets.QVBoxLayout()
     layout_buttons_right = QtWidgets.QVBoxLayout()
-    
+
     layout_buttons_left.addWidget(randomise_button)
     layout_buttons_right.addWidget(reset_button)
     layout_buttons_left.addWidget(rotate_f)
@@ -390,6 +381,16 @@ def main():
     rotate_standing.clicked.connect(lambda: [rotate_face(x, plotter, current_cube) for x in ["F", "F", "F", "B"]])
     reverse_standing.clicked.connect(lambda: [rotate_face(x, plotter, current_cube) for x in ["F", "B", "B", "B"]])
     reset_button.clicked.connect(lambda: reset_cube(plotter))
+    return window
+
+
+def main():
+    global current_cube
+    current_cube = copy.deepcopy(START_CUBE)
+    # Initialise an app to display the cube
+    app = QtWidgets.QApplication(sys.argv)
+    window = initialise_window()
+    window.show()
     app.exec_()
 
 
