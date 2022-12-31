@@ -1,10 +1,10 @@
 import copy
 import random
+import sys
 
 import pyvista as pv
 from pyvistaqt import plotting
 from PyQt6 import QtWidgets
-import sys
 import numpy as np
 
 
@@ -200,7 +200,7 @@ FACES = np.hstack([  # Front
 current_cube = dict()
 
 
-def generate_mesh(cube: dict):
+def generate_mesh(cube: dict) -> pv.PolyData:
     mesh = pv.PolyData(VERTICES, FACES)
     mesh.cell_data['colors'] = [
                                 # Front
@@ -281,12 +281,12 @@ def randomise_cube(plotter: plotting.QtInteractor):
     global current_cube
     current_cube = copy.deepcopy(START_CUBE)
     moves_list = list(MOVES)
-    for _ in range(50):
+    for _ in range(100):
         move = moves_list[random.randrange(0, 6)]
         rotate_face(move, plotter, current_cube)
 
 
-def reset_cube(plotter):
+def reset_cube(plotter: plotting.QtInteractor):
     global current_cube
     current_cube = copy.deepcopy(START_CUBE)
     plotter = update_mesh(plotter)
@@ -303,7 +303,7 @@ def update_mesh(plotter: plotting.QtInteractor) -> plotting.QtInteractor:
     return plotter
 
 
-def initialise_window():
+def initialise_window() -> QtWidgets.QWidget:
     window = QtWidgets.QWidget()
     plotter = generate_model()
 
@@ -386,11 +386,15 @@ def initialise_window():
 
 def main():
     global current_cube
+    # Generate the cube to be used in game
     current_cube = copy.deepcopy(START_CUBE)
     # Initialise an app to display the cube
     app = QtWidgets.QApplication(sys.argv)
+
+    # Initialise and show the game window
     window = initialise_window()
     window.show()
+
     app.exec_()
 
 
