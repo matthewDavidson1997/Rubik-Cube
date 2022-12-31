@@ -7,9 +7,10 @@ from pyvistaqt import plotting
 from PyQt6 import QtWidgets
 import numpy as np
 
-
+# Define possible moves
 MOVES = {"U", "D", "F", "B", "L", "R"}
 
+# Define colours for the cube
 COLOURS = {"Red": [255, 0, 0],
            "Green": [0, 255, 0],
            "Blue": [0, 0, 255],
@@ -17,6 +18,7 @@ COLOURS = {"Red": [255, 0, 0],
            "White": [255, 255, 255],
            "Orange": [255, 128, 0]}
 
+# Define the starting colours of the cube
 START_CUBE = {
         # Red Side (Front)
         "F": {
@@ -61,6 +63,7 @@ START_CUBE = {
             }
         }
 
+# Define the neighbours of different cube faces
 CUBE_NEIGHBOURS = {
                     "F":
                     {
@@ -106,6 +109,7 @@ CUBE_NEIGHBOURS = {
                     }
                     }
 
+# Define where each face is located in the model
 CUBE_COORDINATES = {"F":
                     [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [2.0, 0.0, 0.0], [3.0, 0.0, 0.0],
                      [0.0, 0.0, 1.0], [1.0, 0.0, 1.0], [2.0, 0.0, 1.0], [3.0, 0.0, 1.0],
@@ -137,6 +141,7 @@ CUBE_COORDINATES = {"F":
                      [0.0, 2.0, 0.0], [1.0, 2.0, 0.0], [2.0, 2.0, 0.0], [3.0, 2.0, 0.0],
                      [0.0, 3.0, 0.0], [1.0, 3.0, 0.0], [2.0, 3.0, 0.0], [3.0, 3.0, 0.0]]}
 
+# Define cube vertices in the model
 VERTICES = np.array([
                     # Front
                     [0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [2.0, 0.0, 0.0], [3.0, 0.0, 0.0],
@@ -169,6 +174,7 @@ VERTICES = np.array([
                     [0.0, 2.0, 0.0], [1.0, 2.0, 0.0], [2.0, 2.0, 0.0], [3.0, 2.0, 0.0],
                     [0.0, 3.0, 0.0], [1.0, 3.0, 0.0], [2.0, 3.0, 0.0], [3.0, 3.0, 0.0]])
 
+# Define the cells that make up faces
 FACES = np.hstack([  # Front
                     [4, 0, 1, 5, 4], [4, 1, 2, 6, 5], [4, 2, 3, 7, 6],  # R1 L -> R
                     [4, 4, 5, 9, 8], [4, 5, 6, 10, 9], [4, 6, 7, 11, 10],  # R2 L -> R
@@ -233,18 +239,44 @@ def generate_mesh(cube: dict) -> pv.PolyData:
 def generate_model() -> plotting.QtInteractor:
     global current_cube
     plotter = plotting.QtInteractor(auto_update=True)
-    plotter = update_mesh(plotter)
+    plotter = update_mesh(plotter=plotter)
     return plotter
+
+
+def rotate_cube_x(plotter: plotting.QtInteractor, cube: dict):
+    global current_cube
+    # rotate cube on x axis
+    new_cube = copy.deepcopy(cube)
+    new_cube["F"] = cube["R"]
+    new_cube["R"] = cube["B"]
+    new_cube["B"] = cube["L"]
+    new_cube["L"] = cube["F"]
+    new_cube = rotate_face("U", plotter, new_cube)
+    new_cube = rotate_face("D", plotter, new_cube)
+    current_cube = new_cube
+    plotter = update_mesh(plotter=plotter)
+
+
+def rotate_cube_y(plotter: plotting.QtInteractor, cube: dict):
+    global current_cube
+    # rotate cube on x axis
+    new_cube = copy.deepcopy(cube)
+    new_cube["F"] = cube["D"]
+    new_cube["U"] = cube["F"]
+    new_cube["B"] = cube["U"]
+    new_cube["D"] = cube["B"]
+    new_cube = rotate_face("R", plotter, new_cube)
+    new_cube = rotate_face("L", plotter, new_cube)
+    new_cube = rotate_face("L", plotter, new_cube)
+    new_cube = rotate_face("L", plotter, new_cube)
+    current_cube = new_cube
+    plotter = update_mesh(plotter=plotter)
 
 
 def rotate_face(side: str, plotter: plotting.QtInteractor, cube: dict):
     global current_cube
     # one rotation clockwise
     new_cube = copy.deepcopy(cube)
-    neighbours_u = list(CUBE_NEIGHBOURS[side]["U"])
-    neighbours_d = list(CUBE_NEIGHBOURS[side]["D"])
-    neighbours_l = list(CUBE_NEIGHBOURS[side]["L"])
-    neighbours_r = list(CUBE_NEIGHBOURS[side]["R"])
     # Face top row
     new_cube[side]["TL"] = cube[side]["BL"]
     new_cube[side]["TM"] = cube[side]["ML"]
@@ -257,6 +289,18 @@ def rotate_face(side: str, plotter: plotting.QtInteractor, cube: dict):
     new_cube[side]["BL"] = cube[side]["BR"]
     new_cube[side]["BM"] = cube[side]["MR"]
     new_cube[side]["BR"] = cube[side]["TR"]
+    return new_cube
+
+
+def rotate_side(side: str, plotter: plotting.QtInteractor, cube: dict):
+    global current_cube
+    # one rotation clockwise
+    new_cube = copy.deepcopy(cube)
+    neighbours_u = list(CUBE_NEIGHBOURS[side]["U"])
+    neighbours_d = list(CUBE_NEIGHBOURS[side]["D"])
+    neighbours_l = list(CUBE_NEIGHBOURS[side]["L"])
+    neighbours_r = list(CUBE_NEIGHBOURS[side]["R"])
+    new_cube = rotate_face(side, plotter, cube)
     # Up
     new_cube[neighbours_u[0]][neighbours_u[1]] = cube[neighbours_l[0]][neighbours_l[3]]
     new_cube[neighbours_u[0]][neighbours_u[2]] = cube[neighbours_l[0]][neighbours_l[2]]
@@ -274,27 +318,28 @@ def rotate_face(side: str, plotter: plotting.QtInteractor, cube: dict):
     new_cube[neighbours_r[0]][neighbours_r[2]] = cube[neighbours_u[0]][neighbours_u[2]]
     new_cube[neighbours_r[0]][neighbours_r[3]] = cube[neighbours_u[0]][neighbours_u[3]]
     current_cube = new_cube
-    plotter = update_mesh(plotter)
+    plotter = update_mesh(plotter=plotter)
 
 
 def randomise_cube(plotter: plotting.QtInteractor):
     global current_cube
-    current_cube = copy.deepcopy(START_CUBE)
     moves_list = list(MOVES)
     for _ in range(100):
         move = moves_list[random.randrange(0, 6)]
-        rotate_face(move, plotter, current_cube)
+        rotate_side(side=move, plotter=plotter, cube=current_cube)
 
 
 def reset_cube(plotter: plotting.QtInteractor):
     global current_cube
+    # Set the game cube to the start cube
     current_cube = copy.deepcopy(START_CUBE)
-    plotter = update_mesh(plotter)
+    plotter = update_mesh(plotter=plotter)
 
 
 def update_mesh(plotter: plotting.QtInteractor) -> plotting.QtInteractor:
     global current_cube
-    plotter.add_mesh(generate_mesh(current_cube),
+    mesh = generate_mesh(cube=current_cube)
+    plotter.add_mesh(mesh,
                      scalars='colors',
                      lighting=False,
                      rgb=True,
@@ -304,33 +349,43 @@ def update_mesh(plotter: plotting.QtInteractor) -> plotting.QtInteractor:
 
 
 def initialise_window() -> QtWidgets.QWidget:
+    # Create window
     window = QtWidgets.QWidget()
+
+    # Generate the plot for the cube
     plotter = generate_model()
 
+    # Initialise all of the buttons used
     randomise_button = QtWidgets.QPushButton("Randomise Cube")
     reset_button = QtWidgets.QPushButton("Reset Cube")
-    rotate_f = QtWidgets.QPushButton("Rotate Red")
-    reverse_f = QtWidgets.QPushButton("Reverse Red")
-    rotate_r = QtWidgets.QPushButton("Rotate Blue")
-    reverse_r = QtWidgets.QPushButton("Reverse Blue")
-    rotate_b = QtWidgets.QPushButton("Rotate Orange")
-    reverse_b = QtWidgets.QPushButton("Reverse Orange")
-    rotate_l = QtWidgets.QPushButton("Rotate Green")
-    reverse_l = QtWidgets.QPushButton("Reverse Green")
-    rotate_u = QtWidgets.QPushButton("Rotate White")
-    reverse_u = QtWidgets.QPushButton("Reverse White")
-    rotate_d = QtWidgets.QPushButton("Rotate Yellow")
-    reverse_d = QtWidgets.QPushButton("Reverse Yellow")
-    rotate_middle = QtWidgets.QPushButton("Rotate Middle")
-    reverse_middle = QtWidgets.QPushButton("Reverse Middle")
+    rotate_f = QtWidgets.QPushButton("Rotate Left")
+    reverse_f = QtWidgets.QPushButton("Reverse Left")
+    rotate_r = QtWidgets.QPushButton("Rotate Front")
+    reverse_r = QtWidgets.QPushButton("Reverse Front")
+    rotate_b = QtWidgets.QPushButton("Rotate Right")
+    reverse_b = QtWidgets.QPushButton("Reverse Right")
+    rotate_l = QtWidgets.QPushButton("Rotate Back")
+    reverse_l = QtWidgets.QPushButton("Reverse Back")
+    rotate_u = QtWidgets.QPushButton("Rotate Up")
+    reverse_u = QtWidgets.QPushButton("Reverse Up")
+    rotate_d = QtWidgets.QPushButton("Rotate Down")
+    reverse_d = QtWidgets.QPushButton("Reverse Down")
+    rotate_middle = QtWidgets.QPushButton("Rotate Standing")
+    reverse_middle = QtWidgets.QPushButton("Reverse Standing")
     rotate_equator = QtWidgets.QPushButton("Rotate Equator")
     reverse_equator = QtWidgets.QPushButton("Reverse Equator")
-    rotate_standing = QtWidgets.QPushButton("Rotate Standing")
-    reverse_standing = QtWidgets.QPushButton("Reverse Standing")
+    rotate_standing = QtWidgets.QPushButton("Rotate Middle")
+    reverse_standing = QtWidgets.QPushButton("Reverse Middle")
+    rotate_cube_on_x = QtWidgets.QPushButton("Rotate Cube X")
+    reverse_rotate_cube_on_x = QtWidgets.QPushButton("Reverse Rotate Cube X")
+    rotate_cube_on_y = QtWidgets.QPushButton("Rotate Cube Y")
+    reverse_rotate_cube_on_y = QtWidgets.QPushButton("Reverse Rotate Cube Y")
 
+    # Create layouts for the buttons
     layout_buttons_left = QtWidgets.QVBoxLayout()
     layout_buttons_right = QtWidgets.QVBoxLayout()
 
+    # Add buttons to layout
     layout_buttons_left.addWidget(randomise_button)
     layout_buttons_right.addWidget(reset_button)
     layout_buttons_left.addWidget(rotate_f)
@@ -351,36 +406,47 @@ def initialise_window() -> QtWidgets.QWidget:
     layout_buttons_right.addWidget(reverse_equator)
     layout_buttons_left.addWidget(rotate_standing)
     layout_buttons_right.addWidget(reverse_standing)
+    layout_buttons_left.addWidget(rotate_cube_on_x)
+    layout_buttons_right.addWidget(rotate_cube_on_y)
+    layout_buttons_left.addWidget(reverse_rotate_cube_on_x)
+    layout_buttons_right.addWidget(reverse_rotate_cube_on_y)
 
+    # Create a layout for the whole window including buttons and the plot
     layout_window = QtWidgets.QHBoxLayout()
     layout_window.addWidget(plotter)
     layout_window.addLayout(layout_buttons_left)
     layout_window.addLayout(layout_buttons_right)
 
+    # apply layout and add title
     window.setLayout(layout_window)
     window.setWindowTitle("Rubik's Cube")
 
-    # Define actions for each button press
+    # Define actions for button
     randomise_button.clicked.connect(lambda: randomise_cube(plotter=plotter))
-    rotate_f.clicked.connect(lambda: rotate_face("F", plotter, current_cube))
-    reverse_f.clicked.connect(lambda: [rotate_face("F", plotter, current_cube) for _ in range(3)])
-    rotate_r.clicked.connect(lambda: rotate_face("R", plotter, current_cube))
-    reverse_r.clicked.connect(lambda: [rotate_face("R", plotter, current_cube) for _ in range(3)])
-    rotate_b.clicked.connect(lambda: rotate_face("B", plotter, current_cube))
-    reverse_b.clicked.connect(lambda: [rotate_face("B", plotter, current_cube) for _ in range(3)])
-    rotate_l.clicked.connect(lambda: rotate_face("L", plotter, current_cube))
-    reverse_l.clicked.connect(lambda: [rotate_face("L", plotter, current_cube) for _ in range(3)])
-    rotate_u.clicked.connect(lambda: rotate_face("U", plotter, current_cube))
-    reverse_u.clicked.connect(lambda: [rotate_face("U", plotter, current_cube) for _ in range(3)])
-    rotate_d.clicked.connect(lambda: rotate_face("D", plotter, current_cube))
-    reverse_d.clicked.connect(lambda: [rotate_face("D", plotter, current_cube) for _ in range(3)])
-    rotate_middle.clicked.connect(lambda: [rotate_face(x, plotter, current_cube) for x in ["L", "R", "R", "R"]])
-    reverse_middle.clicked.connect(lambda: [rotate_face(x, plotter, current_cube) for x in ["R", "L", "L", "L"]])
-    rotate_equator.clicked.connect(lambda: [rotate_face(x, plotter, current_cube) for x in ["U", "U", "U", "D"]])
-    reverse_equator.clicked.connect(lambda: [rotate_face(x, plotter, current_cube) for x in ["D", "D", "D", "U"]])
-    rotate_standing.clicked.connect(lambda: [rotate_face(x, plotter, current_cube) for x in ["F", "F", "F", "B"]])
-    reverse_standing.clicked.connect(lambda: [rotate_face(x, plotter, current_cube) for x in ["F", "B", "B", "B"]])
+    rotate_f.clicked.connect(lambda: rotate_side("F", plotter, current_cube))
+    reverse_f.clicked.connect(lambda: [rotate_side("F", plotter, current_cube) for _ in range(3)])
+    rotate_r.clicked.connect(lambda: rotate_side("R", plotter, current_cube))
+    reverse_r.clicked.connect(lambda: [rotate_side("R", plotter, current_cube) for _ in range(3)])
+    rotate_b.clicked.connect(lambda: rotate_side("B", plotter, current_cube))
+    reverse_b.clicked.connect(lambda: [rotate_side("B", plotter, current_cube) for _ in range(3)])
+    rotate_l.clicked.connect(lambda: rotate_side("L", plotter, current_cube))
+    reverse_l.clicked.connect(lambda: [rotate_side("L", plotter, current_cube) for _ in range(3)])
+    rotate_u.clicked.connect(lambda: rotate_side("U", plotter, current_cube))
+    reverse_u.clicked.connect(lambda: [rotate_side("U", plotter, current_cube) for _ in range(3)])
+    rotate_d.clicked.connect(lambda: rotate_side("D", plotter, current_cube))
+    reverse_d.clicked.connect(lambda: [rotate_side("D", plotter, current_cube) for _ in range(3)])
+    rotate_middle.clicked.connect(lambda: [rotate_side(x, plotter, current_cube) for x in ["L", "R", "R", "R"]])
+    reverse_middle.clicked.connect(lambda: [rotate_side(x, plotter, current_cube) for x in ["R", "L", "L", "L"]])
+    rotate_equator.clicked.connect(lambda: [rotate_side(x, plotter, current_cube) for x in ["U", "U", "U", "D"]])
+    reverse_equator.clicked.connect(lambda: [rotate_side(x, plotter, current_cube) for x in ["D", "D", "D", "U"]])
+    rotate_standing.clicked.connect(lambda: [rotate_side(x, plotter, current_cube) for x in ["F", "F", "F", "B"]])
+    reverse_standing.clicked.connect(lambda: [rotate_side(x, plotter, current_cube) for x in ["F", "B", "B", "B"]])
     reset_button.clicked.connect(lambda: reset_cube(plotter))
+    rotate_cube_on_x.clicked.connect(lambda: rotate_cube_x(plotter, current_cube))
+    rotate_cube_on_y.clicked.connect(lambda: rotate_cube_y(plotter, current_cube))
+    reverse_rotate_cube_on_x.clicked.connect(lambda: [rotate_cube_x(plotter, current_cube) for _ in range(3)])
+    reverse_rotate_cube_on_y.clicked.connect(lambda: [rotate_cube_y(plotter, current_cube) for _ in range(3)])
+
     return window
 
 
