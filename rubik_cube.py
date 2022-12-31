@@ -300,7 +300,7 @@ def update_mesh(plotter: plotting.QtInteractor) -> plotting.QtInteractor:
                      rgb=True,
                      preference='cell',
                      show_edges=True)
-    return plotter 
+    return plotter
 
 
 def main():
@@ -317,6 +317,7 @@ def main():
     window.show()
 
     randomise_button = QtWidgets.QPushButton("Randomise Cube")
+    reset_button = QtWidgets.QPushButton("Reset Cube")
     rotate_f = QtWidgets.QPushButton("Rotate Red")
     reverse_f = QtWidgets.QPushButton("Reverse Red")
     rotate_r = QtWidgets.QPushButton("Rotate Blue")
@@ -329,14 +330,12 @@ def main():
     reverse_u = QtWidgets.QPushButton("Reverse White")
     rotate_d = QtWidgets.QPushButton("Rotate Yellow")
     reverse_d = QtWidgets.QPushButton("Reverse Yellow")
-    reset_button = QtWidgets.QPushButton("Reset Cube")
     rotate_middle = QtWidgets.QPushButton("Rotate Middle")
     reverse_middle = QtWidgets.QPushButton("Reverse Middle")
     rotate_equator = QtWidgets.QPushButton("Rotate Equator")
     reverse_equator = QtWidgets.QPushButton("Reverse Equator")
     rotate_standing = QtWidgets.QPushButton("Rotate Standing")
     reverse_standing = QtWidgets.QPushButton("Reverse Standing")
-
 
     layout_buttons_left = QtWidgets.QVBoxLayout()
     layout_buttons_right = QtWidgets.QVBoxLayout()
@@ -388,19 +387,7 @@ def main():
     rotate_standing.clicked.connect(lambda: [rotate_face(x, plotter, current_cube) for x in ["F", "F", "F", "B"]])
     reverse_standing.clicked.connect(lambda: [rotate_face(x, plotter, current_cube) for x in ["F", "B", "B", "B"]])
     reset_button.clicked.connect(lambda: reset_cube(plotter))
-    # layout = QtWidgets.QHBoxLayout()
-
-    randomise_cube_choice = input("Would you like to randomise the cube? (Y/N): ").upper()
-    if randomise_cube_choice == "Y":
-        current_cube = randomise_cube(current_cube, plotter)
-        plotter = update_mesh(plotter, current_cube)
-
-    while True:
-        user_choice = input(f"Choose a face to rotate (clockwise) must be one of: {MOVES}\n\
-                            Choice: ").upper()
-        if user_choice in MOVES:
-            current_cube = rotate_face(current_cube, user_choice, plotter)
-            plotter = update_mesh(plotter, current_cube)
+    app.exec_()
 
 
 if __name__ == "__main__":
