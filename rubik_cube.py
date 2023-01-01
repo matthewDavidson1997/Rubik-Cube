@@ -349,9 +349,11 @@ def randomise_cube(plotter: plotting.QtInteractor):
 
 def reset_cube(plotter: plotting.QtInteractor):
     global current_cube
+    global user_moves
     # Set the game cube to the start cube
     current_cube = copy.deepcopy(START_CUBE)
     plotter = update_mesh(plotter=plotter)
+    user_moves = []
 
 
 def update_mesh(plotter: plotting.QtInteractor) -> plotting.QtInteractor:
@@ -403,6 +405,7 @@ def initialise_window() -> QtWidgets.QWidget:
     # Create layouts for the buttons
     layout_buttons_left = QtWidgets.QVBoxLayout()
     layout_buttons_right = QtWidgets.QVBoxLayout()
+    layout_buttons_middle = QtWidgets.QVBoxLayout()
 
     # Add buttons to layout
     layout_buttons_left.addWidget(randomise_button)
@@ -429,13 +432,18 @@ def initialise_window() -> QtWidgets.QWidget:
     layout_buttons_right.addWidget(rotate_cube_on_y)
     layout_buttons_left.addWidget(reverse_rotate_cube_on_x)
     layout_buttons_right.addWidget(reverse_rotate_cube_on_y)
-    layout_buttons_left.addWidget(solve_cube_button)
+    layout_buttons_middle.addWidget(solve_cube_button)
 
     # Create a layout for the whole window including buttons and the plot
     layout_window = QtWidgets.QHBoxLayout()
+    layout_buttons = QtWidgets.QHBoxLayout()
+    layout_buttons.addLayout(layout_buttons_left)
+    layout_buttons.addLayout(layout_buttons_right)
+    layout_additional_buttons = QtWidgets.QVBoxLayout()
+    layout_additional_buttons.addLayout(layout_buttons)
+    layout_additional_buttons.addWidget(solve_cube_button)
     layout_window.addWidget(plotter)
-    layout_window.addLayout(layout_buttons_left)
-    layout_window.addLayout(layout_buttons_right)
+    layout_window.addLayout(layout_additional_buttons)
 
     # apply layout and add title
     window.setLayout(layout_window)
@@ -476,10 +484,9 @@ def initialise_window() -> QtWidgets.QWidget:
     return window
 
 
-def cube_rotation(plotter, move, direction, record_moves: str):
+def cube_rotation(plotter: plotting.QtInteractor, move: str, direction: str, record_moves: str):
     global user_moves
     global current_cube
-    print(move)
     if move == "M":
         if direction == "C":
             cube_rotation(plotter, "L", "C", "Y")
@@ -537,20 +544,20 @@ def cube_rotation(plotter, move, direction, record_moves: str):
 
 def solve_cube():
     global user_moves
-    print(user_moves)
     for x in range(len(user_moves) - 1, - 1, -1):
-        print(user_moves[x])
         cube_rotation(user_moves[x][0], user_moves[x][1], user_moves[x][2], "N")
-        time.sleep(0.1)
+        time.sleep(0.05)
     user_moves = []
 
 
 def main():
     global current_cube
     global user_moves
+
     user_moves = []
     # Generate the cube to be used in game
     current_cube = copy.deepcopy(START_CUBE)
+
     # Initialise an app to display the cube
     app = QtWidgets.QApplication(sys.argv)
 
@@ -559,7 +566,6 @@ def main():
     window.show()
 
     app.exec_()
-    print(user_moves)
 
 
 if __name__ == "__main__":
