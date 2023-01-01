@@ -378,18 +378,18 @@ def initialise_window() -> QtWidgets.QWidget:
     # Initialise all of the buttons used
     randomise_button = QtWidgets.QPushButton("Randomise Cube")
     reset_button = QtWidgets.QPushButton("Reset Cube")
-    rotate_f = QtWidgets.QPushButton("Rotate Left")
-    reverse_f = QtWidgets.QPushButton("Reverse Left")
-    rotate_r = QtWidgets.QPushButton("Rotate Front")
-    reverse_r = QtWidgets.QPushButton("Reverse Front")
-    rotate_b = QtWidgets.QPushButton("Rotate Right")
-    reverse_b = QtWidgets.QPushButton("Reverse Right")
-    rotate_l = QtWidgets.QPushButton("Rotate Back")
-    reverse_l = QtWidgets.QPushButton("Reverse Back")
-    rotate_u = QtWidgets.QPushButton("Rotate Up")
-    reverse_u = QtWidgets.QPushButton("Reverse Up")
-    rotate_d = QtWidgets.QPushButton("Rotate Down")
-    reverse_d = QtWidgets.QPushButton("Reverse Down")
+    rotate_f = QtWidgets.QPushButton("L")
+    reverse_f = QtWidgets.QPushButton("L'")
+    rotate_r = QtWidgets.QPushButton("F")
+    reverse_r = QtWidgets.QPushButton("F'")
+    rotate_b = QtWidgets.QPushButton("R")
+    reverse_b = QtWidgets.QPushButton("R'")
+    rotate_l = QtWidgets.QPushButton("B")
+    reverse_l = QtWidgets.QPushButton("B'")
+    rotate_u = QtWidgets.QPushButton("U")
+    reverse_u = QtWidgets.QPushButton("U'")
+    rotate_d = QtWidgets.QPushButton("D")
+    reverse_d = QtWidgets.QPushButton("D'")
     rotate_middle = QtWidgets.QPushButton("Rotate Standing")
     reverse_middle = QtWidgets.QPushButton("Reverse Standing")
     rotate_equator = QtWidgets.QPushButton("Rotate Equator")
@@ -397,9 +397,9 @@ def initialise_window() -> QtWidgets.QWidget:
     rotate_standing = QtWidgets.QPushButton("Rotate Middle")
     reverse_standing = QtWidgets.QPushButton("Reverse Middle")
     rotate_cube_on_x = QtWidgets.QPushButton("Rotate Cube X")
-    reverse_rotate_cube_on_x = QtWidgets.QPushButton("Reverse Rotate Cube X")
+    reverse_rotate_cube_on_x = QtWidgets.QPushButton("Rotate Cube X'")
     rotate_cube_on_y = QtWidgets.QPushButton("Rotate Cube Y")
-    reverse_rotate_cube_on_y = QtWidgets.QPushButton("Reverse Rotate Cube Y")
+    reverse_rotate_cube_on_y = QtWidgets.QPushButton("Rotate Cube Y'")
     solve_cube_button = QtWidgets.QPushButton("Solve Cube")
 
     # Create layouts for the buttons
@@ -465,21 +465,21 @@ def initialise_window() -> QtWidgets.QWidget:
     rotate_d.clicked.connect(lambda: cube_rotation(plotter, "D", "C", "Y"))
     reverse_d.clicked.connect(lambda: cube_rotation(plotter, "D", "CC", "Y"))
 
-    rotate_middle.clicked.connect(lambda: cube_rotation(plotter, "M", "C"))
-    reverse_middle.clicked.connect(lambda: cube_rotation(plotter, "M", "CC"))
-    rotate_equator.clicked.connect(lambda: cube_rotation(plotter, "E", "C"))
-    reverse_equator.clicked.connect(lambda: cube_rotation(plotter, "E", "CC"))
-    rotate_standing.clicked.connect(lambda: cube_rotation(plotter, "S", "C"))
-    reverse_standing.clicked.connect(lambda: cube_rotation(plotter, "S", "CC"))
+    rotate_middle.clicked.connect(lambda: cube_rotation(plotter, "M", "C", "N"))
+    reverse_middle.clicked.connect(lambda: cube_rotation(plotter, "M", "CC", "N"))
+    rotate_equator.clicked.connect(lambda: cube_rotation(plotter, "E", "C", "N"))
+    reverse_equator.clicked.connect(lambda: cube_rotation(plotter, "E", "CC", "N"))
+    rotate_standing.clicked.connect(lambda: cube_rotation(plotter, "S", "C", "N"))
+    reverse_standing.clicked.connect(lambda: cube_rotation(plotter, "S", "CC", "N"))
 
     reset_button.clicked.connect(lambda: reset_cube(plotter))
 
     solve_cube_button.clicked.connect(lambda: solve_cube())
 
-    rotate_cube_on_x.clicked.connect(lambda: cube_rotation(plotter, "RCX", "C"))
-    rotate_cube_on_y.clicked.connect(lambda: cube_rotation(plotter, "RCY", "C"))
-    reverse_rotate_cube_on_x.clicked.connect(lambda: cube_rotation(plotter, "RCX", "CC"))
-    reverse_rotate_cube_on_y.clicked.connect(lambda: cube_rotation(plotter, "RCY", "CC"))
+    rotate_cube_on_x.clicked.connect(lambda: cube_rotation(plotter, "RCX", "C", "N"))
+    rotate_cube_on_y.clicked.connect(lambda: cube_rotation(plotter, "RCY", "C", "N"))
+    reverse_rotate_cube_on_x.clicked.connect(lambda: cube_rotation(plotter, "RCX", "CC", "N"))
+    reverse_rotate_cube_on_y.clicked.connect(lambda: cube_rotation(plotter, "RCY", "CC", "N"))
 
     return window
 
@@ -496,11 +496,11 @@ def cube_rotation(plotter: plotting.QtInteractor, move: str, direction: str, rec
             cube_rotation(plotter, "R", "C", "Y")
     elif move == "E":
         if direction == "C":
-            cube_rotation(plotter, "D", "C", "Y")
-            cube_rotation(plotter, "U", "CC", "Y")
-        elif direction == "CC":
             cube_rotation(plotter, "D", "CC", "Y")
             cube_rotation(plotter, "U", "C", "Y")
+        elif direction == "CC":
+            cube_rotation(plotter, "D", "C", "Y")
+            cube_rotation(plotter, "U", "CC", "Y")
     elif move == "S":
         if direction == "C":
             cube_rotation(plotter, "B", "C", "Y")
@@ -512,33 +512,37 @@ def cube_rotation(plotter: plotting.QtInteractor, move: str, direction: str, rec
         if direction == "C":
             rotate_cube_x(plotter, current_cube)
             if record_moves == "Y":
-                user_moves.append((plotter, "RCX", "CC"))
+                user_moves.append((plotter, "RCX", "CC", "N"))
         elif direction == "CC":
             rotate_cube_x(plotter, current_cube)
             rotate_cube_x(plotter, current_cube)
             rotate_cube_x(plotter, current_cube)
             if record_moves == "Y":
-                user_moves.append((plotter, "RCX", "C"))
+                user_moves.append((plotter, "RCX", "C", "N"))
     elif move == "RCY":
         if direction == "C":
             rotate_cube_y(plotter, current_cube)
             if record_moves == "Y":
-                user_moves.append((plotter, "RCY", "CC"))
+                user_moves.append((plotter, "RCY", "CC", "N"))
         elif direction == "CC":
             rotate_cube_y(plotter, current_cube)
             rotate_cube_y(plotter, current_cube)
             rotate_cube_y(plotter, current_cube)
             if record_moves == "Y":
-                user_moves.append((plotter, "RCY", "C"))
+                user_moves.append((plotter, "RCY", "C", "N"))
     elif direction == "C":
+        print(move)
         rotate_side(move, plotter, current_cube)
         if record_moves == "Y":
-            user_moves.append((plotter, move, "CC"))
+            user_moves.append((plotter, move, "CC", "N"))
+        print("-----")
     elif direction == "CC":
         for _ in range(3):
+            print(move)
             rotate_side(move, plotter, current_cube)
-            if record_moves == "Y":
-                user_moves.append((plotter, move, "C"))
+        if record_moves == "Y":
+            user_moves.append((plotter, move, "C", "N"))
+        print("-----")
     plotter = update_mesh(plotter)
 
 
