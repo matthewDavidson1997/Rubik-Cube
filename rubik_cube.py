@@ -413,8 +413,10 @@ def randomise_cube(plotter: plotting.QtInteractor):
     global user_moves
     moves_list = list(MOVES)
     for _ in range(100):
+        rotation_list = ["C", "CC"]
         move = moves_list[random.randrange(0, 6)]
-        cube_rotation(plotter, move, "C", "Y")
+        rotation = rotation_list[random.randrange(0, 2)]
+        cube_rotation(plotter, move, rotation, "Y")
 
 
 def reset_cube(plotter: plotting.QtInteractor):
