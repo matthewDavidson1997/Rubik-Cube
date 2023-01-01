@@ -240,6 +240,7 @@ def generate_model() -> plotting.QtInteractor:
     global current_cube
     plotter = plotting.QtInteractor(auto_update=True)
     plotter = update_mesh(plotter=plotter)
+    plotter.show_axes()
     return plotter
 
 
@@ -261,14 +262,26 @@ def rotate_cube_y(plotter: plotting.QtInteractor, cube: dict):
     global current_cube
     # rotate cube on x axis
     new_cube = copy.deepcopy(cube)
-    new_cube["F"] = cube["D"]
-    new_cube["U"] = cube["F"]
-    new_cube["B"] = cube["U"]
-    new_cube["D"] = cube["B"]
+    new_cube["R"] = cube["D"]
     new_cube = rotate_face("R", plotter, new_cube)
+    new_cube = rotate_face("R", plotter, new_cube)
+    new_cube = rotate_face("R", plotter, new_cube)
+    new_cube["U"] = cube["R"]
+    new_cube = rotate_face("U", plotter, new_cube)
+    new_cube = rotate_face("U", plotter, new_cube)
+    new_cube = rotate_face("U", plotter, new_cube)
+    new_cube["L"] = cube["U"]
     new_cube = rotate_face("L", plotter, new_cube)
     new_cube = rotate_face("L", plotter, new_cube)
     new_cube = rotate_face("L", plotter, new_cube)
+    new_cube["D"] = cube["L"]
+    new_cube = rotate_face("D", plotter, new_cube)
+    new_cube = rotate_face("D", plotter, new_cube)
+    new_cube = rotate_face("D", plotter, new_cube)
+    new_cube = rotate_face("B", plotter, new_cube)
+    new_cube = rotate_face("F", plotter, new_cube)
+    new_cube = rotate_face("F", plotter, new_cube)
+    new_cube = rotate_face("F", plotter, new_cube)
     current_cube = new_cube
     plotter = update_mesh(plotter=plotter)
 
