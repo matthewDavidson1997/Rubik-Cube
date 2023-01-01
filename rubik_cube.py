@@ -262,29 +262,51 @@ def rotate_cube_x(plotter: plotting.QtInteractor, cube: dict):
     plotter = update_mesh(plotter=plotter)
 
 
+def reverse_rotate_cube_x(plotter: plotting.QtInteractor, cube: dict):
+    global current_cube
+    # rotate cube on x axis
+    new_cube = copy.deepcopy(cube)
+    new_cube["F"] = cube["L"]
+    new_cube["L"] = cube["B"]
+    new_cube["B"] = cube["R"]
+    new_cube["R"] = cube["F"]
+    new_cube = reverse_rotate_face("U", plotter, new_cube)
+    new_cube = reverse_rotate_face("D", plotter, new_cube)
+    current_cube = new_cube
+    plotter = update_mesh(plotter=plotter)
+
+
 def rotate_cube_y(plotter: plotting.QtInteractor, cube: dict):
     global current_cube
     # rotate cube on x axis
     new_cube = copy.deepcopy(cube)
     new_cube["R"] = cube["D"]
-    new_cube = rotate_face("R", plotter, new_cube)
-    new_cube = rotate_face("R", plotter, new_cube)
-    new_cube = rotate_face("R", plotter, new_cube)
+    new_cube = reverse_rotate_face("R", plotter, new_cube)
     new_cube["U"] = cube["R"]
-    new_cube = rotate_face("U", plotter, new_cube)
-    new_cube = rotate_face("U", plotter, new_cube)
-    new_cube = rotate_face("U", plotter, new_cube)
+    new_cube = reverse_rotate_face("U", plotter, new_cube)
     new_cube["L"] = cube["U"]
-    new_cube = rotate_face("L", plotter, new_cube)
-    new_cube = rotate_face("L", plotter, new_cube)
-    new_cube = rotate_face("L", plotter, new_cube)
+    new_cube = reverse_rotate_face("L", plotter, new_cube)
     new_cube["D"] = cube["L"]
-    new_cube = rotate_face("D", plotter, new_cube)
-    new_cube = rotate_face("D", plotter, new_cube)
-    new_cube = rotate_face("D", plotter, new_cube)
+    new_cube = reverse_rotate_face("D", plotter, new_cube)
     new_cube = rotate_face("B", plotter, new_cube)
-    new_cube = rotate_face("F", plotter, new_cube)
-    new_cube = rotate_face("F", plotter, new_cube)
+    new_cube = reverse_rotate_face("F", plotter, new_cube)
+    current_cube = new_cube
+    plotter = update_mesh(plotter=plotter)
+
+
+def reverse_rotate_cube_y(plotter: plotting.QtInteractor, cube: dict):
+    global current_cube
+    # rotate cube on x axis
+    new_cube = copy.deepcopy(cube)
+    new_cube["R"] = cube["U"]
+    new_cube = rotate_face("R", plotter, new_cube)
+    new_cube["U"] = cube["L"]
+    new_cube = rotate_face("U", plotter, new_cube)
+    new_cube["L"] = cube["D"]
+    new_cube = rotate_face("L", plotter, new_cube)
+    new_cube["D"] = cube["R"]
+    new_cube = rotate_face("D", plotter, new_cube)
+    new_cube = reverse_rotate_face("B", plotter, new_cube)
     new_cube = rotate_face("F", plotter, new_cube)
     current_cube = new_cube
     plotter = update_mesh(plotter=plotter)
@@ -306,6 +328,25 @@ def rotate_face(side: str, plotter: plotting.QtInteractor, cube: dict):
     new_cube[side]["BL"] = cube[side]["BR"]
     new_cube[side]["BM"] = cube[side]["MR"]
     new_cube[side]["BR"] = cube[side]["TR"]
+    return new_cube
+
+
+def reverse_rotate_face(side: str, plotter: plotting.QtInteractor, cube: dict):
+    global current_cube
+    # one rotation clockwise
+    new_cube = copy.deepcopy(cube)
+    # Face top row
+    new_cube[side]["TL"] = cube[side]["TR"]
+    new_cube[side]["TM"] = cube[side]["MR"]
+    new_cube[side]["TR"] = cube[side]["BR"]
+    # Face middle row
+    new_cube[side]["ML"] = cube[side]["TM"]
+    new_cube[side]["MM"] = cube[side]["MM"]
+    new_cube[side]["MR"] = cube[side]["BM"]
+    # Face bottom row
+    new_cube[side]["BL"] = cube[side]["TL"]
+    new_cube[side]["BM"] = cube[side]["ML"]
+    new_cube[side]["BR"] = cube[side]["BL"]
     return new_cube
 
 
@@ -334,6 +375,35 @@ def rotate_side(side: str, plotter: plotting.QtInteractor, cube: dict):
     new_cube[neighbours_r[0]][neighbours_r[1]] = cube[neighbours_u[0]][neighbours_u[1]]
     new_cube[neighbours_r[0]][neighbours_r[2]] = cube[neighbours_u[0]][neighbours_u[2]]
     new_cube[neighbours_r[0]][neighbours_r[3]] = cube[neighbours_u[0]][neighbours_u[3]]
+    current_cube = new_cube
+    plotter = update_mesh(plotter=plotter)
+
+
+def reverse_rotate_side(side: str, plotter: plotting.QtInteractor, cube: dict):
+    global current_cube
+    # one rotation clockwise
+    new_cube = copy.deepcopy(cube)
+    neighbours_u = list(CUBE_NEIGHBOURS[side]["U"])
+    neighbours_d = list(CUBE_NEIGHBOURS[side]["D"])
+    neighbours_l = list(CUBE_NEIGHBOURS[side]["L"])
+    neighbours_r = list(CUBE_NEIGHBOURS[side]["R"])
+    new_cube = reverse_rotate_face(side, plotter, cube)
+    # Up
+    new_cube[neighbours_u[0]][neighbours_u[1]] = cube[neighbours_r[0]][neighbours_r[1]]
+    new_cube[neighbours_u[0]][neighbours_u[2]] = cube[neighbours_r[0]][neighbours_r[2]]
+    new_cube[neighbours_u[0]][neighbours_u[3]] = cube[neighbours_r[0]][neighbours_r[3]]
+    # Down
+    new_cube[neighbours_d[0]][neighbours_d[1]] = cube[neighbours_l[0]][neighbours_l[1]]
+    new_cube[neighbours_d[0]][neighbours_d[2]] = cube[neighbours_l[0]][neighbours_l[2]]
+    new_cube[neighbours_d[0]][neighbours_d[3]] = cube[neighbours_l[0]][neighbours_l[3]]
+    # Left
+    new_cube[neighbours_r[0]][neighbours_r[1]] = cube[neighbours_d[0]][neighbours_d[3]]
+    new_cube[neighbours_r[0]][neighbours_r[2]] = cube[neighbours_d[0]][neighbours_d[2]]
+    new_cube[neighbours_r[0]][neighbours_r[3]] = cube[neighbours_d[0]][neighbours_d[1]]
+    # Right
+    new_cube[neighbours_l[0]][neighbours_l[1]] = cube[neighbours_u[0]][neighbours_u[3]]
+    new_cube[neighbours_l[0]][neighbours_l[2]] = cube[neighbours_u[0]][neighbours_u[2]]
+    new_cube[neighbours_l[0]][neighbours_l[3]] = cube[neighbours_u[0]][neighbours_u[1]]
     current_cube = new_cube
     plotter = update_mesh(plotter=plotter)
 
@@ -476,10 +546,10 @@ def initialise_window() -> QtWidgets.QWidget:
 
     solve_cube_button.clicked.connect(lambda: solve_cube())
 
-    rotate_cube_on_x.clicked.connect(lambda: cube_rotation(plotter, "RCX", "C", "N"))
-    rotate_cube_on_y.clicked.connect(lambda: cube_rotation(plotter, "RCY", "C", "N"))
-    reverse_rotate_cube_on_x.clicked.connect(lambda: cube_rotation(plotter, "RCX", "CC", "N"))
-    reverse_rotate_cube_on_y.clicked.connect(lambda: cube_rotation(plotter, "RCY", "CC", "N"))
+    rotate_cube_on_x.clicked.connect(lambda: cube_rotation(plotter, "RCX", "C", "Y"))
+    rotate_cube_on_y.clicked.connect(lambda: cube_rotation(plotter, "RCY", "C", "Y"))
+    reverse_rotate_cube_on_x.clicked.connect(lambda: cube_rotation(plotter, "RCX", "CC", "Y"))
+    reverse_rotate_cube_on_y.clicked.connect(lambda: cube_rotation(plotter, "RCY", "CC", "Y"))
 
     return window
 
@@ -514,9 +584,7 @@ def cube_rotation(plotter: plotting.QtInteractor, move: str, direction: str, rec
             if record_moves == "Y":
                 user_moves.append((plotter, "RCX", "CC", "N"))
         elif direction == "CC":
-            rotate_cube_x(plotter, current_cube)
-            rotate_cube_x(plotter, current_cube)
-            rotate_cube_x(plotter, current_cube)
+            reverse_rotate_cube_x(plotter, current_cube)
             if record_moves == "Y":
                 user_moves.append((plotter, "RCX", "C", "N"))
     elif move == "RCY":
@@ -525,9 +593,7 @@ def cube_rotation(plotter: plotting.QtInteractor, move: str, direction: str, rec
             if record_moves == "Y":
                 user_moves.append((plotter, "RCY", "CC", "N"))
         elif direction == "CC":
-            rotate_cube_y(plotter, current_cube)
-            rotate_cube_y(plotter, current_cube)
-            rotate_cube_y(plotter, current_cube)
+            reverse_rotate_cube_y(plotter, current_cube)
             if record_moves == "Y":
                 user_moves.append((plotter, "RCY", "C", "N"))
     elif direction == "C":
@@ -535,14 +601,10 @@ def cube_rotation(plotter: plotting.QtInteractor, move: str, direction: str, rec
         rotate_side(move, plotter, current_cube)
         if record_moves == "Y":
             user_moves.append((plotter, move, "CC", "N"))
-        print("-----")
     elif direction == "CC":
-        for _ in range(3):
-            print(move)
-            rotate_side(move, plotter, current_cube)
+        reverse_rotate_side(move, plotter, current_cube)
         if record_moves == "Y":
             user_moves.append((plotter, move, "C", "N"))
-        print("-----")
     plotter = update_mesh(plotter)
 
 
@@ -550,7 +612,7 @@ def solve_cube():
     global user_moves
     for x in range(len(user_moves) - 1, - 1, -1):
         cube_rotation(user_moves[x][0], user_moves[x][1], user_moves[x][2], "N")
-        time.sleep(0.05)
+        time.sleep(0.02)
     user_moves = []
 
 
