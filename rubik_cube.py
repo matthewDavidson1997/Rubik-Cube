@@ -244,7 +244,6 @@ def generate_model() -> plotting.QtInteractor:
     global current_cube
     plotter = plotting.QtInteractor(auto_update=True)
     plotter = update_mesh(plotter=plotter)
-    plotter.show_axes()
     return plotter
 
 
