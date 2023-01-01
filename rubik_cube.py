@@ -1,6 +1,7 @@
 import copy
 import random
 import sys
+import time
 
 import pyvista as pv
 from pyvistaqt import plotting
@@ -205,6 +206,9 @@ FACES = np.hstack([  # Front
 # Initialise a global variable for the game cube based on a solved cube
 current_cube = dict()
 
+# Variable to track moves
+user_moves = []
+
 
 def generate_mesh(cube: dict) -> pv.PolyData:
     mesh = pv.PolyData(VERTICES, FACES)
@@ -336,9 +340,11 @@ def rotate_side(side: str, plotter: plotting.QtInteractor, cube: dict):
 
 def randomise_cube(plotter: plotting.QtInteractor):
     global current_cube
+    global user_moves
     moves_list = list(MOVES)
     for _ in range(100):
         move = moves_list[random.randrange(0, 6)]
+        user_moves.append((plotter, move, "C"))
         rotate_side(side=move, plotter=plotter, cube=current_cube)
 
 
@@ -393,6 +399,7 @@ def initialise_window() -> QtWidgets.QWidget:
     reverse_rotate_cube_on_x = QtWidgets.QPushButton("Reverse Rotate Cube X")
     rotate_cube_on_y = QtWidgets.QPushButton("Rotate Cube Y")
     reverse_rotate_cube_on_y = QtWidgets.QPushButton("Reverse Rotate Cube Y")
+    solve_cube_button = QtWidgets.QPushButton("Solve Cube")
 
     # Create layouts for the buttons
     layout_buttons_left = QtWidgets.QVBoxLayout()
@@ -423,6 +430,7 @@ def initialise_window() -> QtWidgets.QWidget:
     layout_buttons_right.addWidget(rotate_cube_on_y)
     layout_buttons_left.addWidget(reverse_rotate_cube_on_x)
     layout_buttons_right.addWidget(reverse_rotate_cube_on_y)
+    layout_buttons_left.addWidget(solve_cube_button)
 
     # Create a layout for the whole window including buttons and the plot
     layout_window = QtWidgets.QHBoxLayout()
@@ -436,31 +444,111 @@ def initialise_window() -> QtWidgets.QWidget:
 
     # Define actions for button
     randomise_button.clicked.connect(lambda: randomise_cube(plotter=plotter))
-    rotate_f.clicked.connect(lambda: rotate_side("F", plotter, current_cube))
-    reverse_f.clicked.connect(lambda: [rotate_side("F", plotter, current_cube) for _ in range(3)])
-    rotate_r.clicked.connect(lambda: rotate_side("R", plotter, current_cube))
-    reverse_r.clicked.connect(lambda: [rotate_side("R", plotter, current_cube) for _ in range(3)])
-    rotate_b.clicked.connect(lambda: rotate_side("B", plotter, current_cube))
-    reverse_b.clicked.connect(lambda: [rotate_side("B", plotter, current_cube) for _ in range(3)])
-    rotate_l.clicked.connect(lambda: rotate_side("L", plotter, current_cube))
-    reverse_l.clicked.connect(lambda: [rotate_side("L", plotter, current_cube) for _ in range(3)])
-    rotate_u.clicked.connect(lambda: rotate_side("U", plotter, current_cube))
-    reverse_u.clicked.connect(lambda: [rotate_side("U", plotter, current_cube) for _ in range(3)])
-    rotate_d.clicked.connect(lambda: rotate_side("D", plotter, current_cube))
-    reverse_d.clicked.connect(lambda: [rotate_side("D", plotter, current_cube) for _ in range(3)])
-    rotate_middle.clicked.connect(lambda: [rotate_side(x, plotter, current_cube) for x in ["L", "R", "R", "R"]])
-    reverse_middle.clicked.connect(lambda: [rotate_side(x, plotter, current_cube) for x in ["R", "L", "L", "L"]])
-    rotate_equator.clicked.connect(lambda: [rotate_side(x, plotter, current_cube) for x in ["U", "U", "U", "D"]])
-    reverse_equator.clicked.connect(lambda: [rotate_side(x, plotter, current_cube) for x in ["D", "D", "D", "U"]])
-    rotate_standing.clicked.connect(lambda: [rotate_side(x, plotter, current_cube) for x in ["F", "F", "F", "B"]])
-    reverse_standing.clicked.connect(lambda: [rotate_side(x, plotter, current_cube) for x in ["F", "B", "B", "B"]])
+
+    rotate_f.clicked.connect(lambda: cube_rotation(plotter, "F", "C", "Y"))
+    reverse_f.clicked.connect(lambda: cube_rotation(plotter, "F", "CC", "Y"))
+    rotate_r.clicked.connect(lambda: cube_rotation(plotter, "R", "C", "Y"))
+    reverse_r.clicked.connect(lambda: cube_rotation(plotter, "R", "CC", "Y"))
+    rotate_b.clicked.connect(lambda: cube_rotation(plotter, "B", "C", "Y"))
+    reverse_b.clicked.connect(lambda: cube_rotation(plotter, "B", "CC", "Y"))
+    rotate_l.clicked.connect(lambda: cube_rotation(plotter, "L", "C", "Y"))
+    reverse_l.clicked.connect(lambda: cube_rotation(plotter, "L", "CC", "Y"))
+    rotate_u.clicked.connect(lambda: cube_rotation(plotter, "U", "C", "Y"))
+    reverse_u.clicked.connect(lambda: cube_rotation(plotter, "U", "CC", "Y"))
+    rotate_d.clicked.connect(lambda: cube_rotation(plotter, "D", "C", "Y"))
+    reverse_d.clicked.connect(lambda: cube_rotation(plotter, "D", "CC", "Y"))
+
+    rotate_middle.clicked.connect(lambda: cube_rotation(plotter, "M", "C"))
+    reverse_middle.clicked.connect(lambda: cube_rotation(plotter, "M", "CC"))
+    rotate_equator.clicked.connect(lambda: cube_rotation(plotter, "E", "C"))
+    reverse_equator.clicked.connect(lambda: cube_rotation(plotter, "E", "CC"))
+    rotate_standing.clicked.connect(lambda: cube_rotation(plotter, "S", "C"))
+    reverse_standing.clicked.connect(lambda: cube_rotation(plotter, "S", "CC"))
+
     reset_button.clicked.connect(lambda: reset_cube(plotter))
-    rotate_cube_on_x.clicked.connect(lambda: rotate_cube_x(plotter, current_cube))
-    rotate_cube_on_y.clicked.connect(lambda: rotate_cube_y(plotter, current_cube))
-    reverse_rotate_cube_on_x.clicked.connect(lambda: [rotate_cube_x(plotter, current_cube) for _ in range(3)])
-    reverse_rotate_cube_on_y.clicked.connect(lambda: [rotate_cube_y(plotter, current_cube) for _ in range(3)])
+    solve_cube_button.clicked.connect(lambda: solve_cube())
+
+    rotate_cube_on_x.clicked.connect(lambda: cube_rotation(plotter, "RCX", "C"))
+    rotate_cube_on_y.clicked.connect(lambda: cube_rotation(plotter, "RCY", "C"))
+    reverse_rotate_cube_on_x.clicked.connect(lambda: cube_rotation(plotter, "RCX", "CC"))
+    reverse_rotate_cube_on_y.clicked.connect(lambda: cube_rotation(plotter, "RCY", "CC"))
 
     return window
+
+
+def cube_rotation(plotter, move, direction, *record_moves):
+    global user_moves
+    global current_cube
+    if move == "M":
+        if direction == "C":
+            cube_rotation(plotter, "L", "C", "Y")
+            cube_rotation(plotter, "R", "CC", "Y")
+        elif direction == "CC":
+            cube_rotation(plotter, "L", "CC", "Y")
+            cube_rotation(plotter, "R", "C", "Y")
+    elif move == "E":
+        if direction == "C":
+            cube_rotation(plotter, "D", "C", "Y")
+            cube_rotation(plotter, "U", "CC", "Y")
+        elif direction == "CC":
+            cube_rotation(plotter, "D", "CC", "Y")
+            cube_rotation(plotter, "U", "C", "Y")
+    elif move == "S":
+        if direction == "C":
+            cube_rotation(plotter, "B", "C", "Y")
+            cube_rotation(plotter, "F", "CC", "Y")
+        elif direction == "CC":
+            cube_rotation(plotter, "B", "CC", "Y")
+            cube_rotation(plotter, "F", "C", "Y")
+    elif move == "RCX":
+        if direction == "C":
+            print("RCX C")
+            rotate_cube_x(plotter, current_cube)
+            if record_moves == "Y":
+                user_moves.append((plotter, "RCX", "C"))
+        elif direction == "CC":
+            print("RCX CC")
+            rotate_cube_x(plotter, current_cube)
+            rotate_cube_x(plotter, current_cube)
+            rotate_cube_x(plotter, current_cube)
+            if record_moves == "Y":
+                user_moves.append((plotter, "RCX", "CC"))
+    elif move == "RCY":
+        if direction == "C":
+            print("RCY C")
+            rotate_cube_y(plotter, current_cube)
+            if record_moves == "Y":
+                user_moves.append((plotter, "RCY", "C"))
+        elif direction == "CC":
+            print("RCY CC")
+            rotate_cube_y(plotter, current_cube)
+            rotate_cube_y(plotter, current_cube)
+            rotate_cube_y(plotter, current_cube)
+            if record_moves == "Y":
+                user_moves.append((plotter, "RCY", "CC"))
+    elif direction == "C":
+        print("C")
+        rotate_side(move, plotter, current_cube)
+        if record_moves == "Y":
+            user_moves.append((plotter, move, "C"))
+    elif direction == "CC":
+        for _ in range(3):
+            print("CC")
+            rotate_side(move, plotter, current_cube)
+            if record_moves == "Y":
+                user_moves.append((plotter, move, "CC"))
+
+
+def solve_cube():
+    global user_moves
+    print(user_moves)
+    for x in range(len(user_moves) - 1, - 1, -1):
+        print(user_moves[x])
+        if user_moves[x][2] == "C":
+            cube_rotation(user_moves[x][0], user_moves[x][1], "CC", "N")
+        elif user_moves[x][2] == "CC":
+            cube_rotation(user_moves[x][0], user_moves[x][1], "C", "N")
+        time.sleep(0.2)
 
 
 def main():
@@ -475,6 +563,7 @@ def main():
     window.show()
 
     app.exec_()
+    print(user_moves)
 
 
 if __name__ == "__main__":
