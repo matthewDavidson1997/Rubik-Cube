@@ -240,6 +240,17 @@ def generate_mesh(cube: dict) -> pv.PolyData:
     return mesh
 
 
+def update_mesh(plotter: plotting.QtInteractor) -> plotting.QtInteractor:
+    global current_cube
+    plotter.add_mesh(generate_mesh(cube=current_cube),
+                     scalars='colors',
+                     lighting=False,
+                     rgb=True,
+                     preference='cell',
+                     show_edges=True)
+    return plotter
+
+
 def generate_model() -> plotting.QtInteractor:
     global current_cube
     plotter = plotting.QtInteractor(auto_update=True)
@@ -256,7 +267,7 @@ def rotate_cube_x(plotter: plotting.QtInteractor, cube: dict):
     new_cube["B"] = cube["L"]
     new_cube["L"] = cube["F"]
     new_cube = rotate_face("U", plotter, new_cube)
-    new_cube = rotate_face("D", plotter, new_cube)
+    new_cube = reverse_rotate_face("D", plotter, new_cube)
     current_cube = new_cube
     plotter = update_mesh(plotter=plotter)
 
@@ -270,7 +281,7 @@ def reverse_rotate_cube_x(plotter: plotting.QtInteractor, cube: dict):
     new_cube["B"] = cube["R"]
     new_cube["R"] = cube["F"]
     new_cube = reverse_rotate_face("U", plotter, new_cube)
-    new_cube = reverse_rotate_face("D", plotter, new_cube)
+    new_cube = rotate_face("D", plotter, new_cube)
     current_cube = new_cube
     plotter = update_mesh(plotter=plotter)
 
@@ -425,18 +436,6 @@ def reset_cube(plotter: plotting.QtInteractor):
     current_cube = copy.deepcopy(START_CUBE)
     plotter = update_mesh(plotter=plotter)
     user_moves = []
-
-
-def update_mesh(plotter: plotting.QtInteractor) -> plotting.QtInteractor:
-    global current_cube
-    mesh = generate_mesh(cube=current_cube)
-    plotter.add_mesh(mesh,
-                     scalars='colors',
-                     lighting=False,
-                     rgb=True,
-                     preference='cell',
-                     show_edges=True)
-    return plotter
 
 
 def initialise_window() -> QtWidgets.QWidget:
@@ -598,7 +597,6 @@ def cube_rotation(plotter: plotting.QtInteractor, move: str, direction: str, rec
             if record_moves == "Y":
                 user_moves.append((plotter, "RCY", "C", "N"))
     elif direction == "C":
-        print(move)
         rotate_side(move, plotter, current_cube)
         if record_moves == "Y":
             user_moves.append((plotter, move, "CC", "N"))
@@ -622,6 +620,7 @@ def main():
     global user_moves
 
     user_moves = []
+
     # Generate the cube to be used in game
     current_cube = copy.deepcopy(START_CUBE)
 
